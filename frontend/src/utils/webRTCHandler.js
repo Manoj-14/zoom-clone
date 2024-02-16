@@ -146,3 +146,43 @@ const addStream = (stream, connectedUserSocketId) => {
     }
   });
 };
+
+//Buttons logic
+export const toggleMic = (isMuted) => {
+  localStream.getAudioTracks()[0].enabled = isMuted ? true : false;
+};
+
+export const toggleCamere = (isDisabled) => {
+  localStream.getVideoTracks()[0].enabled = isDisabled ? true : false;
+};
+
+export const toggleScreenShare = (
+  isScreenSharingActive,
+  screenShaingStream = null
+) => {
+  if (isScreenSharingActive) {
+    switchVideoTracks(localStream);
+  } else {
+    switchVideoTracks(screenShaingStream);
+  }
+};
+
+const switchVideoTracks = (stream) => {
+  for (let socket_id in peers) {
+    for (let index in peers[socket_id].streams[0].getTracks()) {
+      for (let index2 in stream.getTracks()) {
+        if (
+          peers[socket_id].streams[0].getTracks()[index].kind ===
+          stream.getTracks()[index2].kind
+        ) {
+          peers[socket_id].replaceTrack(
+            peers[socket_id].streams[0].getTracks()[index],
+            stream.getTracks()[index2],
+            peers[socket_id].streams[0]
+          );
+          break;
+        }
+      }
+    }
+  }
+};
