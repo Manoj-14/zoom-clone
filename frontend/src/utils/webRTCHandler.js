@@ -1,4 +1,4 @@
-import { setShowOverlay } from "../store/action";
+import { setMessages, setShowOverlay } from "../store/action";
 import store from "../store/store";
 import * as wss from "./wss";
 import Peer from "simple-peer";
@@ -51,6 +51,8 @@ const getConfiguration = () => {
   };
 };
 
+const messangerChannel = "messanger";
+
 export const prepareNewPeerConnection = (
   connectedUserSocketId,
   isInitiator
@@ -60,6 +62,7 @@ export const prepareNewPeerConnection = (
     initiator: isInitiator,
     config: configuration,
     stream: localStream,
+    channelName: messangerChannel,
   });
   // when getting signal from peer
   peers[connectedUserSocketId].on("signal", (data) => {
@@ -75,6 +78,11 @@ export const prepareNewPeerConnection = (
 
     addStream(stream, connectedUserSocketId);
     streams = [...streams, stream];
+  });
+
+  peers[connectedUserSocketId].on("data", (data) => {
+    const messageData = JSON.parse(data);
+    appendNewMessage(messageData);
   });
 };
 
@@ -184,5 +192,31 @@ const switchVideoTracks = (stream) => {
         }
       }
     }
+  }
+};
+//Messages
+const appendNewMessage = (messageData) => {
+  const messages = store.getState().messages;
+  store.dispatch(setMessages([...messages, messageData]));
+};
+
+export const sendMessageUsingDataChannel = (messageContent) => {
+  const identity = store.getState().identity;
+
+  const localMessageResponse = {
+    content: messageContent,
+    identity,
+    messageCreatedByMe: true,
+  };
+
+  appendNewMessage(localMessageResponse);
+  const messageData = {
+    content: messageContent,
+    identity,
+  };
+
+  const stringifiedMessageData = JSON.stringify(messageData);
+  for (let socketId in peers) {
+    peers[socketId].send(stringifiedMessageData);
   }
 };
