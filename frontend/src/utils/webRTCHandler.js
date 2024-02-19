@@ -155,6 +155,8 @@ const showLocalvideoPreview = (stream) => {
 
   if (store.getState().connectOnlyWithAudio) {
     videoContainer.appendChild(getAudioOnlyLabel());
+  } else {
+    videoContainer.style.position = "static";
   }
   videosContainer.appendChild(videoContainer);
 };
@@ -187,6 +189,8 @@ const addStream = (stream, connectedUserSocketId) => {
   );
   if (participant?.onlyAudio) {
     videoContainer.appendChild(getAudioOnlyLabel(participant.identity));
+  } else {
+    videoContainer.style.position = "static";
   }
   videosContainer.appendChild(videoContainer);
 };
