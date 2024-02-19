@@ -4,6 +4,7 @@ import * as wss from "./wss";
 import Peer from "simple-peer";
 
 import * as process from "process";
+import { fetchTurnCredentials, getTURNIceServers } from "./turn";
 
 window.global = window;
 window.process = process;
@@ -29,6 +30,7 @@ export const getLocalPreviewAndInitRoomConnection = async (
   roomid = null,
   onlyAudio
 ) => {
+  await fetchTurnCredentials();
   const constraints = onlyAudio ? onlyAudioConstraints : defaultConstraints;
   navigator.mediaDevices
     .getUserMedia(constraints)
@@ -51,13 +53,26 @@ let peers = {};
 let streams = [];
 //configuration to get internt info using stun server
 const getConfiguration = () => {
-  return {
-    iceServers: [
-      {
-        urls: "stun:stun.l.google.com:19302",
-      },
-    ],
-  };
+  const TURNIceServers = getTURNIceServers();
+  if (TURNIceServers) {
+    return {
+      iceServers: [
+        {
+          url: "stun:stun.l.google.com:19302",
+        },
+        ...TURNIceServers,
+      ],
+    };
+  } else {
+    console.warn("Using only stunt server");
+    return {
+      iceServers: [
+        {
+          urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    };
+  }
 };
 
 const messangerChannel = "messanger";
