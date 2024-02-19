@@ -76,6 +76,9 @@ io.on("connection", (socket) => {
   socket.on("conn-init", (data) => {
     initializeConnectionHandler(data, socket);
   });
+  socket.on("direct-message", (data) => {
+    directMessageHandler(data, socket);
+  });
 });
 // socker io handlers
 const createNewRoomHandler = (data, socket) => {
@@ -183,6 +186,32 @@ const initializeConnectionHandler = (data, socket) => {
 
   const initData = { connectedUserSocketId: socket.id };
   io.to(connectedUserSocketId).emit("conn-init", initData); // emit to wss.js
+};
+
+// Direct message
+const directMessageHandler = (data, socket) => {
+  if (
+    connectedUsers.find(
+      (connUser) => connUser.socketId === data.receiverSocketId
+    )
+  ) {
+    const receiverData = {
+      authorSocketId: socket.id,
+      messageContent: data.messageContent,
+      isAuthor: false,
+      identity: data.identity,
+    };
+    socket.to(data.receiverSocketId).emit("direct-message", receiverData);
+
+    const authorData = {
+      receiverSocketId: data.receiverSocketId,
+      messageContent: data.messageContent,
+      isAuthor: true,
+      identity: data.identity,
+    };
+
+    socket.emit("direct-message", authorData);
+  }
 };
 
 server.listen(PORT, () => {
