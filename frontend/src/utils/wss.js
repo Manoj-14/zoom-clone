@@ -47,19 +47,21 @@ export const connectWithSockerIOServer = () => {
   });
 };
 
-export const createNewRoom = (identity) => {
+export const createNewRoom = (identity, onlyAudio) => {
   // emit an event to server that need to create a room
   const data = {
     identity,
+    onlyAudio,
   };
   socket.emit("create-new-room", data);
 };
 
-export const joinRoom = (identity, roomId) => {
+export const joinRoom = (identity, roomId, onlyAudio) => {
   // emit an event to server that need to join a room
   const data = {
     roomId,
     identity,
+    onlyAudio,
   };
   socket.emit("join-room", data);
 };

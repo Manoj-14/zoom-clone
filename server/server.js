@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
 // socker io handlers
 const createNewRoomHandler = (data, socket) => {
   console.log("Host is creating meeting");
-  const { identity } = data;
+  const { identity, onlyAudio } = data;
 
   const roomId = uuidv4();
 
@@ -69,6 +69,7 @@ const createNewRoomHandler = (data, socket) => {
     id: uuidv4(),
     socketId: socket.id,
     roomId,
+    onlyAudio,
   };
 
   // Push that user to connected user
@@ -93,12 +94,13 @@ const createNewRoomHandler = (data, socket) => {
 };
 
 const joinRoomHandler = (data, socket) => {
-  const { identity, roomId } = data;
+  const { identity, roomId, onlyAudio } = data;
   const newUser = {
     identity,
     id: uuidv4(),
     socketId: socket.id,
     roomId,
+    onlyAudio,
   };
 
   // join room as user which is trying to join room oassing room id
